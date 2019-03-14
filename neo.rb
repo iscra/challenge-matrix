@@ -19,8 +19,8 @@ class Neo
 
     def main
         @logger = Logger.new STDOUT
-        @logger.level = :debug
-        RestClient.log = @logger
+        @logger.level = :info
+        #RestClient.log = @logger
         get_pill
         process_sources
     end
@@ -79,13 +79,17 @@ private
     end
 
     def post_data(source, routes)
+        logger.info "*** importing source #{source}"
         routes.each do |route|
             payload = route.to_h
             payload["source"] = source
-            payload["passphrase"] = @passphrase 
+            payload["passphrase"] = @passphrase
+            # convert time to UTC strings
+            payload[:start_time] = payload[:start_time].new_offset(0).strftime("%FT%T") if payload[:start_time]
+            payload[:end_time] = payload[:end_time].new_offset(0).strftime("%FT%T") if payload[:end_time]
             logger.debug "POST #{ROUTES} #{payload.inspect}"
             response = RestClient.post ROUTES, payload
-            logger.info "POST response #{response.inspect}"
+            logger.info "POST response #{response.code}"
         end
     end
 
@@ -114,7 +118,7 @@ protected
     end
 
     def add_route(route)
-        logger.info "adding route #{route.inspect}"
+        logger.info "adding route #{route}"
         @routes << route
     end
 
@@ -159,7 +163,7 @@ class Sentinels < BaseRouteAnalyzer
     def add_route_for_nodes(start_node, end_node)
         route = Route.new 
         route.start_node = start_node["node"]
-        route.start_time = DateTime.parse start_node["time"]
+        route.start_time = DateTime.parse(start_node["time"])
         route.end_node = end_node["node"]
         route.end_time = DateTime.parse end_node["time"]
         add_route route
