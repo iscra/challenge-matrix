@@ -23,3 +23,11 @@ Our operators in Zion are awaiting, please use your own Github terminal to send 
 		end_time	ISO 8601 UTC time	YYYY-MM-DDThh:mm:ss
 
 The machines are close. Hurry up, Neo.
+
+## Usage
+
+Just execute neo.rb:
+
+		ruby neo.rb
+
+The script should dwonload all data, process it and then import it back through the API.
